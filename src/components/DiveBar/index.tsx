@@ -27,7 +27,7 @@ export const DiveBar = () => {
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
     const [timeLeft, setTimeLeft] = React.useState<string>("");
-    const contractAddress = '0x6DeD889D8C0Ad038478db9cB79efde87091E4321';
+    const contractAddress = '0x7E5C50753215C9d51BBC1FA3C0B148e697D9dA7f';
     const contractABI = abi.abi;
 
     const checkIfWalletIsConnected = () => {
@@ -120,11 +120,57 @@ export const DiveBar = () => {
                 createdAt: gameInfo['createdAt'],
                 endingAt: gameInfo['endingAt'],
             });
+            // if game is over, call handleGameOver()
+            console.log(gameInfo['endingAt'].toNumber(), Date.now() / 1000)
+            if(gameInfo['endingAt'].toNumber() < Date.now() / 1000) {
+                console.log("Game is over, calling handleGameOver()");
+                const txn = await diveBarContract.handleGameOver();
+                console.log("Game over txn: ", txn);
+
+            }
           } else {
             console.log("Ethereum object doesn't exist!");
           }
         } catch (error) {
-          console.log(error)
+          console.log(error);
+          throw error;
+        }
+    }
+
+    const placeBet = async (amount: number) => {
+        const parsedAmt = ethers.utils.parseEther(amount.toString());
+
+        if(diveBarContract === null) {
+            console.log("Failed to get diveBarContract");
+            return;
+        }
+
+        if(!currentGame) {
+            console.log("Failed to get currentGame");
+            return;
+        }
+
+        if(parsedAmt < currentGame?.minDeposit) {
+            alert("Bet amount must be greater than or equal to the minimum deposit");
+            return;
+        }
+        // txn will be reverted if game is over
+
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const gasPrice = await provider.getGasPrice();
+            const signer = provider.getSigner();
+            const tx = await signer.sendTransaction({
+                from: currentAccount,
+                to: contractAddress,
+                value: parsedAmt.add(gasPrice)
+            });
+            await tx.wait();
+            console.log("Transaction complete!");
+        }
+        catch(err){
+            console.log(err);
+            throw err;
         }
     }
 
@@ -154,8 +200,7 @@ export const DiveBar = () => {
                 {currentGame && <div className={styles.GameContainer}>
                     <div className={styles.GameTimerContainer}>
                         <Countdown
-                            // date={new Date(currentGame.endingAt.toNumber())}
-                            date={Date.now() + 10000}
+                            date={new Date(currentGame.endingAt.toNumber() * 1000)}
                             intervalDelay={0}
                             precision={3}
                             renderer={props => <span className={styles.GameTimer}>{getFormattedGameTimer(props.formatted, props.milliseconds)}</span>}
