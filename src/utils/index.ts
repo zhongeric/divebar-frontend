@@ -16,11 +16,10 @@ export const getTimeUntil = (end: BigNumber) => {
     };
 };
 
-export const getFormattedGameTimer = (endingAt: BigNumber) => {
-    const { days, hours, minutes, seconds } = getTimeUntil(endingAt);
-    const daysString = days > 0 ? `${days}d ` : "";
-    const hoursString = hours > 0 ? `${hours}h ` : "";
-    const minutesString = minutes > 0 ? `${minutes}m ` : "";
-    const secondsString = seconds > 0 ? `${seconds}s ` : "";
+export const getFormattedGameTimer = ({ days, hours, minutes, seconds }: {days: string, hours: string, minutes: string, seconds: string}, milliseconds: number) => {
+    const daysString = Number(days) > 0 ? `${Number(days)} days ` : "";
+    const hoursString = Number(hours) > 0 ? `${Number(hours)} hours ` : "";
+    const minutesString = Number(minutes) > 0 ? `${Number(minutes)} minutes ` : "";
+    const secondsString = Number(seconds) > 0 ? `${Number(seconds)}.${milliseconds} seconds ` : "";
     return `${daysString}${hoursString}${minutesString}${secondsString}` ? `${daysString}${hoursString}${minutesString}${secondsString}` : "The game has ended.";
 }

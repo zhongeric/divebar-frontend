@@ -5,6 +5,7 @@ import abi from "../../utils/DiveBar.json";
 
 import styles from './DiveBar.module.css';
 import { getFormattedGameTimer } from '../../utils';
+import Countdown from 'react-countdown';
 
 declare let window: any;
 
@@ -25,6 +26,7 @@ export const DiveBar = () => {
     const [currentAccount, setCurrentAccount] = React.useState("");
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
+    const [timeLeft, setTimeLeft] = React.useState<string>("");
     const contractAddress = '0x6DeD889D8C0Ad038478db9cB79efde87091E4321';
     const contractABI = abi.abi;
 
@@ -128,19 +130,36 @@ export const DiveBar = () => {
 
     return (
         <div className={`${styles.LandingContainer}`}>
-            <h1 className={styles.HeadingPrimary}>DiveBar</h1>
+            <div className={styles.NavBar}>
+                {!currentAccount ? (
+                    <button className={`retro ${styles.ConnectAccountBtn}`} onClick={connectWallet}>
+                        Connect Wallet
+                    </button>
+                )
+                    :
+                    <div>
+                        Wallet connected
+                    </div>
+                }
+                <h1 className={styles.HeadingPrimary}>DiveBar</h1>
+                <button className={`retro ${styles.ConnectAccountBtn}`}>
+                    Withdraw
+                </button>
+            </div>
             {/*
                 * If there is no currentAccount render this button
             */}
-            {!currentAccount && (
-            <button className={`retro ${styles.ConnectAccountBtn}`} onClick={connectWallet}>
-                Connect Wallet
-            </button>
-            )}
+
             <div className={styles.DiveBarContainer}>
                 {currentGame && <div className={styles.GameContainer}>
                     <div className={styles.GameTimerContainer}>
-                        <span className={styles.GameTimer}>{getFormattedGameTimer(currentGame.endingAt)}</span>
+                        <Countdown
+                            // date={new Date(currentGame.endingAt.toNumber())}
+                            date={Date.now() + 10000}
+                            intervalDelay={0}
+                            precision={3}
+                            renderer={props => <span className={styles.GameTimer}>{getFormattedGameTimer(props.formatted, props.milliseconds)}</span>}
+                        />,
                     </div>
                     <div className={styles.MainGame}>
                         <span className={styles.HeadingPrimary}>The bar is currently at</span>
@@ -150,7 +169,10 @@ export const DiveBar = () => {
                         Bets visualization here
                     </div>
                     <div className={styles.PotDisplay}>
-                        <span className={styles.PotText}>Pot: {currentGame.pot.toString()} ETH</span>
+                        <span className={styles.PotText} style={{
+                            marginRight: '1rem'
+                        }}>Pot: {currentGame.pot.toString()} ETH</span>
+                        <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
                     </div>
                     <div className={styles.BetContainer}>
                         <input type="number" className={styles.BetInput} />
@@ -159,7 +181,7 @@ export const DiveBar = () => {
                             lineHeight: '2',
                             marginLeft: '0.5rem',
                             alignSelf: 'end'
-                        }}>Ξ</span>
+                        }}>ETH</span>
                         <button className={`retro ${styles.BetBtn}`}>Bet</button>
                     </div>
                 </div>}
@@ -167,7 +189,7 @@ export const DiveBar = () => {
                     <span className={styles.HeadingSecondary}>The establishment's rules:</span>
                     <div className={styles.Rules}>
                         <span>You may only bet once per game. You cannot withdraw your bet once it is placed.</span><br />
-                        <span>The minimum bet is 0.001 ETH.</span><br />
+                        <span>The minimum bet is {currentGame && ethers.utils.formatEther(currentGame.minDeposit)} ETH.</span><br />
                         <span>Patrons are rewarded for betting earlier than others. For more details on how this is calculated, see Rewards below.</span><br />
                         <span>The esteemed Divebar establishment takes 0.01% of all winnings to keep the lights on.</span><br />
                     </div>
