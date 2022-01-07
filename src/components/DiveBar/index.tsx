@@ -26,6 +26,7 @@ export const DiveBar = () => {
     const [currentAccount, setCurrentAccount] = React.useState("");
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
+    const [playerBet, setPlayerBet] = React.useState<string>('0');
     const [timeLeft, setTimeLeft] = React.useState<string>("");
     const contractAddress = '0x7E5C50753215C9d51BBC1FA3C0B148e697D9dA7f';
     const contractABI = abi.abi;
@@ -137,8 +138,12 @@ export const DiveBar = () => {
         }
     }
 
-    const placeBet = async (amount: number) => {
-        const parsedAmt = ethers.utils.parseEther(amount.toString());
+    const placeBet = async () => {
+        if(playerBet === '0') {
+            alert("Please enter a bet amount!");
+            return;
+        }
+        const parsedAmt = ethers.utils.parseEther(playerBet);
 
         if(diveBarContract === null) {
             console.log("Failed to get diveBarContract");
@@ -159,9 +164,9 @@ export const DiveBar = () => {
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const gasPrice = await provider.getGasPrice();
-            const signer = provider.getSigner();
+            const signer = await provider.getSigner();
             const tx = await signer.sendTransaction({
-                from: currentAccount,
+                // from: currentAccount,
                 to: contractAddress,
                 value: parsedAmt.add(gasPrice)
             });
@@ -172,6 +177,16 @@ export const DiveBar = () => {
             console.log(err);
             throw err;
         }
+    }
+
+    const withdraw = async () => {
+        if(diveBarContract === null) {
+            console.log("Failed to get diveBarContract");
+            return;
+        }
+        // txn will be reverted if nothing to withdraw
+        const txn = await diveBarContract.getPayout();
+        console.log("Withdraw txn: ", txn);
     }
 
     return (
@@ -188,7 +203,7 @@ export const DiveBar = () => {
                     </div>
                 }
                 <h1 className={styles.HeadingPrimary}>DiveBar</h1>
-                <button className={`retro ${styles.ConnectAccountBtn}`}>
+                <button className={`retro ${styles.ConnectAccountBtn}`} onClick={withdraw}>
                     Withdraw
                 </button>
             </div>
@@ -208,7 +223,7 @@ export const DiveBar = () => {
                     </div>
                     <div className={styles.MainGame}>
                         <span className={styles.HeadingPrimary}>The bar is currently at</span>
-                        <span className={styles.BarText}>{currentGame.avg.toString()} Ξ</span>
+                        <span className={styles.BarText}>{Number(ethers.utils.formatEther(currentGame.avg)).toFixed(3)} Ξ</span>
                     </div>
                     <div>
                         Bets visualization here
@@ -216,18 +231,18 @@ export const DiveBar = () => {
                     <div className={styles.PotDisplay}>
                         <span className={styles.PotText} style={{
                             marginRight: '1rem'
-                        }}>Pot: {currentGame.pot.toString()} ETH</span>
+                        }}>Pot: {Number(ethers.utils.formatEther(currentGame.pot)).toFixed(3)} ETH</span>
                         <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
                     </div>
                     <div className={styles.BetContainer}>
-                        <input type="number" className={styles.BetInput} />
+                        <input type="number" className={styles.BetInput} value={playerBet} onChange={(e) => setPlayerBet(e.currentTarget.value)} />
                         <span style={{
                             fontSize: "1.25rem",
                             lineHeight: '2',
                             marginLeft: '0.5rem',
                             alignSelf: 'end'
                         }}>ETH</span>
-                        <button className={`retro ${styles.BetBtn}`}>Bet</button>
+                        <button className={`retro ${styles.BetBtn}`} onClick={placeBet}>Bet</button>
                     </div>
                 </div>}
                 <div className={styles.RulesContainer}>
