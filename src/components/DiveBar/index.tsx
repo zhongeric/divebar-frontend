@@ -28,7 +28,8 @@ export const DiveBar = () => {
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
     const [playerBet, setPlayerBet] = React.useState<string>('0');
     const [timeLeft, setTimeLeft] = React.useState<string>("");
-    const contractAddress = '0x7E5C50753215C9d51BBC1FA3C0B148e697D9dA7f';
+    const [userBalance, setUserBalance] = React.useState<BigNumber | null>(null);
+    const contractAddress = '0x1E9a3F12Ff8bA78D63FE31c87964676bDed4aA5c';
     const contractABI = abi.abi;
 
     const checkIfWalletIsConnected = () => {
@@ -77,6 +78,8 @@ export const DiveBar = () => {
 
       React.useEffect(() => {
         getGameInfo();
+        getPlayerBetInfo();
+        getUserBalance();
       }, [diveBarContract])
     
       /**
@@ -135,6 +138,54 @@ export const DiveBar = () => {
         } catch (error) {
           console.log(error);
           throw error;
+        }
+    }
+
+    const getPlayerBetInfo = async () => {
+        try {
+          const { ethereum } = window;
+          if(diveBarContract === null) {
+                console.log("Failed to get diveBarContract");
+                return;
+          }
+          if(!currentAccount) {
+                console.log("currentAccount is null");
+                return;
+            }
+    
+          if (ethereum) {
+            let playerBetInfo = await diveBarContract.getPlayer(currentAccount);
+            console.log("Got playerBetInfo: ", playerBetInfo);
+          } else {
+            console.log("Ethereum object doesn't exist!");
+          }
+        } catch (error) {
+            console.log("Player is not in the game");
+            console.log(error);
+        }
+    }
+
+    const getUserBalance = async () => {
+        try {
+            const { ethereum } = window;
+            if(diveBarContract === null) {
+                console.log("Failed to get diveBarContract");
+                return;
+            }
+            if(!currentAccount) {
+                console.log("currentAccount is null");
+                return;
+            }
+            
+            if (ethereum) {
+                let userBalance = await diveBarContract.getUserBalance(currentAccount);
+                console.log("Got userBalance: ", userBalance);
+                setUserBalance(userBalance);
+            } else {
+                console.log("Ethereum object doesn't exist!");
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -203,9 +254,14 @@ export const DiveBar = () => {
                     </div>
                 }
                 <h1 className={styles.HeadingPrimary}>DiveBar</h1>
-                <button className={`retro ${styles.ConnectAccountBtn}`} onClick={withdraw}>
-                    Withdraw
-                </button>
+                <div>
+                    {userBalance && <span>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} ETH</span>}
+                    <button className={`retro ${styles.ConnectAccountBtn}`} onClick={withdraw}>
+                        Withdraw
+                    </button>
+                </div>
+
+                
             </div>
             {/*
                 * If there is no currentAccount render this button
