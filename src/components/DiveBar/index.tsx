@@ -88,7 +88,7 @@ export const DiveBar = () => {
             // TODO: instead, we should subscribe to Deposit events emitted from contract
             const interval = setInterval(() => {
                 getGameInfo();
-            }, 1000);
+            }, 2000);
             return () => clearInterval(interval);
         }, [diveBarContract])
     
