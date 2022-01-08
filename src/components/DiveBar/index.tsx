@@ -20,9 +20,12 @@ type GameType = {
     endingAt: BigNumber,
 }   
 
+const SUPPORTED_NETWORKS_CHAIN_ID = ["42", "1666700000"]; // 42 is kovan, 1666700000 is harmonyTestnet
+
 export const DiveBar = () => {
     // Add react router useRouter hook
     const history = useHistory();
+    const [currentNetworkChainId, setCurrentNetworkChainId] = React.useState<string>("");
     const [currentAccount, setCurrentAccount] = React.useState("");
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
@@ -34,8 +37,13 @@ export const DiveBar = () => {
     const contractAddress = '0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8';
     const contractABI = abi.abi;
 
-    const checkIfWalletIsConnected = () => {
+    const isNetworkSupported = () => {
+        return SUPPORTED_NETWORKS_CHAIN_ID.find(id => id === currentNetworkChainId) !== undefined;
+    }
+
+    const checkIfWalletIsConnected = async () => {
         try {
+            console.log("Checking if wallet is connected...");
           const { ethereum } = window;
           if(!ethereum) {
             console.log("metamask wallet not connected!")
@@ -50,12 +58,48 @@ export const DiveBar = () => {
             setCurrentAccount(account);
           }
           else {
-            console.log("No authorized account found")
+            const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+            if(!accounts.length) {
+                console.log("No authorized account found")
+                return;
+            }
+            const account = accounts[0];
+            setCurrentAccount(account);
           }
+          const provider = getProvider();
+          if(!provider) {
+                console.log("No provider found")
+                return;
+          }
+          const { chainId } = await provider.getNetwork()
+          setCurrentNetworkChainId(chainId.toString());
         }
         catch (err) {
           console.log(err);
         }
+      }
+
+      const getProvider = () => {
+            const { ethereum } = window;
+            if(!ethereum) {
+                console.log("metamask wallet not connected!")
+                return;
+            }
+            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            provider.on("network", (newNetwork, oldNetwork) => {
+                // When a Provider makes its initial connection, it emits a "network"
+                // event with a null oldNetwork along with the newNetwork. So, if the
+                // oldNetwork exists, it represents a changing network
+                setCurrentNetworkChainId(newNetwork.chainId);
+                if(SUPPORTED_NETWORKS_CHAIN_ID.find(id => id === newNetwork.chainId) !== undefined) {
+                    console.log("Network not supported: " + newNetwork.chainId);
+                    return;
+                }
+                if (oldNetwork) {
+                    window.location.reload();
+                }
+            });
+            return provider;
       }
 
       const getContract = () => {
@@ -64,10 +108,14 @@ export const DiveBar = () => {
             console.log("metamask wallet not connected!")
             return;
         }
-        const provider = new ethers.providers.Web3Provider(ethereum);
+        const provider = getProvider();
+        if(!provider) {
+            console.log("Failed to get provider")
+            return;
+        }
         const contract = new ethers.Contract(contractAddress, contractABI, provider.getSigner());
         setDiveBarContract(contract);
-        console.log("contract", contract);
+        console.log("Got contract")
       }
 
       React.useEffect(() => {
@@ -79,18 +127,25 @@ export const DiveBar = () => {
       }, [currentAccount])
 
       React.useEffect(() => {
+        if(!isNetworkSupported() || !diveBarContract) {
+            console.log("Network not supported or contract not found")
+            return;
+        }
         getGameInfo();
         getUserBalance();
-      }, [diveBarContract])
+      }, [diveBarContract, currentNetworkChainId])
 
       // call getGameInfo every second
         React.useEffect(() => {
             // TODO: instead, we should subscribe to Deposit events emitted from contract
+            if(!isNetworkSupported() || !diveBarContract) {
+                return;
+            }
             const interval = setInterval(() => {
                 getGameInfo();
             }, 2000);
             return () => clearInterval(interval);
-        }, [diveBarContract])
+        }, [diveBarContract, currentNetworkChainId])
     
       /**
       * Implement your connectWallet method here
@@ -145,7 +200,7 @@ export const DiveBar = () => {
           }
         } catch (error) {
           console.log(error);
-          throw error;
+        //   throw error;
         }
     }
 
@@ -225,7 +280,11 @@ export const DiveBar = () => {
         // txn will be reverted if game is over
 
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const provider = getProvider();
+            if(!provider) {
+                console.log("Failed to get provider")
+                return;
+            }
             const gasPrice = await provider.getGasPrice();
             const signer = await provider.getSigner();
             const tx = await signer.sendTransaction({
