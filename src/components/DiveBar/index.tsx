@@ -29,7 +29,7 @@ export const DiveBar = () => {
     const [playerBet, setPlayerBet] = React.useState<string>('0');
     const [timeLeft, setTimeLeft] = React.useState<string>("");
     const [userBalance, setUserBalance] = React.useState<BigNumber | null>(null);
-    const contractAddress = '0x1E9a3F12Ff8bA78D63FE31c87964676bDed4aA5c';
+    const contractAddress = '0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8';
     const contractABI = abi.abi;
 
     const checkIfWalletIsConnected = () => {
@@ -128,9 +128,8 @@ export const DiveBar = () => {
             console.log(gameInfo['endingAt'].toNumber(), Date.now() / 1000)
             if(gameInfo['endingAt'].toNumber() < Date.now() / 1000) {
                 console.log("Game is over, calling handleGameOver()");
-                const txn = await diveBarContract.handleGameOver();
-                console.log("Game over txn: ", txn);
-
+                // const txn = await diveBarContract.handleGameOver();
+                // console.log("Game over txn: ", txn);
             }
           } else {
             console.log("Ethereum object doesn't exist!");
