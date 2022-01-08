@@ -27,7 +27,9 @@ export const DiveBar = () => {
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
     const [playerBet, setPlayerBet] = React.useState<string>('0');
+    const [playerHasBet, setPlayerHasBet] = React.useState<boolean>(false);
     const [timeLeft, setTimeLeft] = React.useState<string>("");
+    const [playerData, setPlayerData] = React.useState<{bet: BigNumber, timestamp: BigNumber} | null>(null);
     const [userBalance, setUserBalance] = React.useState<BigNumber | null>(null);
     const contractAddress = '0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8';
     const contractABI = abi.abi;
@@ -78,9 +80,17 @@ export const DiveBar = () => {
 
       React.useEffect(() => {
         getGameInfo();
-        getPlayerBetInfo();
         getUserBalance();
       }, [diveBarContract])
+
+      // call getGameInfo every second
+        React.useEffect(() => {
+            // TODO: instead, we should subscribe to Deposit events emitted from contract
+            const interval = setInterval(() => {
+                getGameInfo();
+            }, 1000);
+            return () => clearInterval(interval);
+        }, [diveBarContract])
     
       /**
       * Implement your connectWallet method here
@@ -102,7 +112,6 @@ export const DiveBar = () => {
           console.log(error)
         }
     }
-
     const getGameInfo = async () => {
         try {
           const { ethereum } = window;
@@ -113,7 +122,7 @@ export const DiveBar = () => {
     
           if (ethereum) {
             let gameInfo = await diveBarContract.getGameInfo();
-            console.log("Got gameInfo: ", gameInfo);
+            console.log("Got gameInfo for game #", gameInfo.id.toString());
             setCurrentGame({
                 id: gameInfo['id'],
                 playersSize: gameInfo['playersSize'],
@@ -124,13 +133,13 @@ export const DiveBar = () => {
                 createdAt: gameInfo['createdAt'],
                 endingAt: gameInfo['endingAt'],
             });
-            // if game is over, call handleGameOver()
-            console.log(gameInfo['endingAt'].toNumber(), Date.now() / 1000)
-            if(gameInfo['endingAt'].toNumber() < Date.now() / 1000) {
-                console.log("Game is over, calling handleGameOver()");
-                // const txn = await diveBarContract.handleGameOver();
-                // console.log("Game over txn: ", txn);
-            }
+            
+            // TODO: use if keepers is not supported on current network
+            // if(gameInfo['endingAt'].toNumber() < Date.now() / 1000) {
+            //     console.log("Game is over, calling handleGameOver()");
+            //     // const txn = await diveBarContract.handleGameOver();
+            //     // console.log("Game over txn: ", txn);
+            // }
           } else {
             console.log("Ethereum object doesn't exist!");
           }
@@ -155,6 +164,10 @@ export const DiveBar = () => {
           if (ethereum) {
             let playerBetInfo = await diveBarContract.getPlayer(currentAccount);
             console.log("Got playerBetInfo: ", playerBetInfo);
+            setPlayerData({
+                bet: playerBetInfo['bet'],
+                timestamp: playerBetInfo['timestamp'],
+            })
           } else {
             console.log("Ethereum object doesn't exist!");
           }
@@ -222,6 +235,9 @@ export const DiveBar = () => {
             });
             await tx.wait();
             console.log("Transaction complete!");
+            
+            await getPlayerBetInfo();
+            setPlayerHasBet(true);
         }
         catch(err){
             console.log(err);
@@ -237,6 +253,8 @@ export const DiveBar = () => {
         // txn will be reverted if nothing to withdraw
         const txn = await diveBarContract.getPayout();
         console.log("Withdraw txn: ", txn);
+        // call getUserBalance() to update userBalance
+        await getUserBalance();
     }
 
     return (
@@ -259,8 +277,6 @@ export const DiveBar = () => {
                         Withdraw
                     </button>
                 </div>
-
-                
             </div>
             {/*
                 * If there is no currentAccount render this button
@@ -274,7 +290,7 @@ export const DiveBar = () => {
                             intervalDelay={0}
                             precision={3}
                             renderer={props => <span className={styles.GameTimer}>{getFormattedGameTimer(props.formatted, props.milliseconds)}</span>}
-                        />,
+                        />
                     </div>
                     <div className={styles.MainGame}>
                         <span className={styles.HeadingPrimary}>The bar is currently at</span>
@@ -289,7 +305,7 @@ export const DiveBar = () => {
                         }}>Pot: {Number(ethers.utils.formatEther(currentGame.pot)).toFixed(3)} ETH</span>
                         <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
                     </div>
-                    <div className={styles.BetContainer}>
+                    {playerHasBet === false ? <div className={styles.BetContainer}>
                         <input type="number" className={styles.BetInput} value={playerBet} onChange={(e) => setPlayerBet(e.currentTarget.value)} />
                         <span style={{
                             fontSize: "1.25rem",
@@ -298,7 +314,10 @@ export const DiveBar = () => {
                             alignSelf: 'end'
                         }}>ETH</span>
                         <button className={`retro ${styles.BetBtn}`} onClick={placeBet}>Bet</button>
-                    </div>
+                    </div> : 
+                    <div className={styles.BetContainer}>
+                        <span className={`retro ${styles.BetText}`}>Your bet: {playerData && Number(ethers.utils.formatEther(playerData.bet)).toFixed(3)} ETH</span>
+                    </div>}
                 </div>}
                 <div className={styles.RulesContainer}>
                     <span className={styles.HeadingSecondary}>The establishment's rules:</span>

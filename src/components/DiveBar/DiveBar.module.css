@@ -73,6 +73,7 @@
 .GameTimer {
     font-size: 2rem;
     line-height: 2;
+    text-align: center;
 }
 
 .BarText {
