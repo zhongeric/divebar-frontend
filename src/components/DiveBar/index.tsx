@@ -18,14 +18,27 @@ type GameType = {
     minDeposit: BigNumber,
     createdAt: BigNumber,
     endingAt: BigNumber,
-}   
+}
 
-const SUPPORTED_NETWORKS_CHAIN_ID = ["42", "1666700000"]; // 42 is kovan, 1666700000 is harmonyTestnet
+interface supportedNetworksChainId {
+    [key: string]: 'KOVAN' | 'HARMONY_TESTNET'
+}
+
+const SUPPORTED_NETWORKS_CHAIN_ID: supportedNetworksChainId = {
+    "42": 'KOVAN',
+    "1666700000": 'HARMONY_TESTNET'
+}
+
+const NETWORK_CONTRACT_ADDRESSES = {
+    KOVAN: "0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8",
+    HARMONY_TESTNET: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
+}
 
 export const DiveBar = () => {
     // Add react router useRouter hook
     const history = useHistory();
     const [currentNetworkChainId, setCurrentNetworkChainId] = React.useState<string>("");
+    const [contractAddress, setContractAddress] = React.useState<string>("");
     const [currentAccount, setCurrentAccount] = React.useState("");
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
@@ -34,11 +47,11 @@ export const DiveBar = () => {
     const [timeLeft, setTimeLeft] = React.useState<string>("");
     const [playerData, setPlayerData] = React.useState<{bet: BigNumber, timestamp: BigNumber} | null>(null);
     const [userBalance, setUserBalance] = React.useState<BigNumber | null>(null);
-    const contractAddress = '0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8';
+    // const contractAddress = '0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8';
     const contractABI = abi.abi;
 
     const isNetworkSupported = () => {
-        return SUPPORTED_NETWORKS_CHAIN_ID.find(id => id === currentNetworkChainId) !== undefined;
+        return currentNetworkChainId in SUPPORTED_NETWORKS_CHAIN_ID;
     }
 
     const checkIfWalletIsConnected = async () => {
@@ -91,7 +104,7 @@ export const DiveBar = () => {
                 // event with a null oldNetwork along with the newNetwork. So, if the
                 // oldNetwork exists, it represents a changing network
                 setCurrentNetworkChainId(newNetwork.chainId);
-                if(SUPPORTED_NETWORKS_CHAIN_ID.find(id => id === newNetwork.chainId) !== undefined) {
+                if(!(newNetwork.chainId in SUPPORTED_NETWORKS_CHAIN_ID)) {
                     console.log("Network not supported: " + newNetwork.chainId);
                     return;
                 }
@@ -123,8 +136,14 @@ export const DiveBar = () => {
       }, [])
 
       React.useEffect(() => {
+          if(currentNetworkChainId in SUPPORTED_NETWORKS_CHAIN_ID) {
+            setContractAddress(NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[currentNetworkChainId]]);
+          }
+      }, [currentNetworkChainId])
+
+      React.useEffect(() => {
         getContract();
-      }, [currentAccount])
+      }, [contractAddress])
 
       React.useEffect(() => {
         if(!isNetworkSupported() || !diveBarContract) {
@@ -167,6 +186,7 @@ export const DiveBar = () => {
           console.log(error)
         }
     }
+    
     const getGameInfo = async () => {
         try {
           const { ethereum } = window;
@@ -188,13 +208,6 @@ export const DiveBar = () => {
                 createdAt: gameInfo['createdAt'],
                 endingAt: gameInfo['endingAt'],
             });
-            
-            // TODO: use if keepers is not supported on current network
-            // if(gameInfo['endingAt'].toNumber() < Date.now() / 1000) {
-            //     console.log("Game is over, calling handleGameOver()");
-            //     // const txn = await diveBarContract.handleGameOver();
-            //     // console.log("Game over txn: ", txn);
-            // }
           } else {
             console.log("Ethereum object doesn't exist!");
           }
