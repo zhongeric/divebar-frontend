@@ -4,6 +4,7 @@ import { BigNumber, ethers } from "ethers";
 import abi from "../../utils/DiveBar.json";
 
 import styles from './DiveBar.module.css';
+import '../shared/Neon.css';
 import { getFormattedGameTimer } from '../../utils';
 import Countdown from 'react-countdown';
 
@@ -186,7 +187,7 @@ export const DiveBar = () => {
           console.log(error)
         }
     }
-    
+
     const getGameInfo = async () => {
         try {
           const { ethereum } = window;
@@ -333,19 +334,29 @@ export const DiveBar = () => {
         <div className={`${styles.LandingContainer}`}>
             <div className={styles.NavBar}>
                 {!currentAccount ? (
-                    <button className={`retro ${styles.ConnectAccountBtn}`} onClick={connectWallet}>
+                    <button className={`${styles.ConnectAccountBtn}`} onClick={connectWallet}>
                         Connect Wallet
                     </button>
                 )
                     :
-                    <div>
-                        Wallet connected
+                    <div className={styles.WalletConnected}>
+                        <img style={{
+                            maxWidth: '25px',
+                            marginRight: '0.5rem'
+                        }} src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"></img>
+                        <span style={{ color: 'black' }}>Wallet connected</span>
                     </div>
                 }
-                <h1 className={styles.HeadingPrimary}>DiveBar</h1>
-                <div>
-                    {userBalance && <span>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} ETH</span>}
-                    <button className={`retro ${styles.ConnectAccountBtn}`} onClick={withdraw}>
+                {/* <h1 className={styles.HeadingPrimary}>Divebar</h1> */}
+                <div className={styles.LogoGameBox}>
+                    <div className="logo"><b>d<span>i</span>ve<span>b</span>ar</b></div>
+                    <span className={styles.GameNumberText}>Game #48</span>
+                </div>
+                <div className={styles.BalanceBox}>
+                    {userBalance && <span style={{
+                        color: 'black'
+                    }}>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} ETH</span>}
+                    <button className={`${styles.ConnectAccountBtn}`} onClick={withdraw}>
                         Withdraw
                     </button>
                 </div>
@@ -368,9 +379,9 @@ export const DiveBar = () => {
                         <span className={styles.HeadingPrimary}>The bar is currently at</span>
                         <span className={styles.BarText}>{Number(ethers.utils.formatEther(currentGame.avg)).toFixed(3)} Ξ</span>
                     </div>
-                    <div>
+                    {/* <div>
                         Bets visualization here
-                    </div>
+                    </div> */}
                     <div className={styles.PotDisplay}>
                         <span className={styles.PotText} style={{
                             marginRight: '1rem'
@@ -378,14 +389,16 @@ export const DiveBar = () => {
                         <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
                     </div>
                     {playerHasBet === false ? <div className={styles.BetContainer}>
-                        <input type="number" className={styles.BetInput} value={playerBet} onChange={(e) => setPlayerBet(e.currentTarget.value)} />
+                        <input type="number" placeholder='0.001' className={styles.BetInput} value={playerBet} onChange={(e) => setPlayerBet(e.currentTarget.value)} />
                         <span style={{
                             fontSize: "1.25rem",
                             lineHeight: '2',
                             marginLeft: '0.5rem',
                             alignSelf: 'end'
                         }}>ETH</span>
-                        <button className={`retro ${styles.BetBtn}`} onClick={placeBet}>Bet</button>
+                        <button className={`${styles.BetBtn}`} onClick={placeBet}>
+                            <div className="logoRegFont"><b>E<span>nt</span>er</b></div>
+                        </button>
                     </div> : 
                     <div className={styles.BetContainer}>
                         <span className={`retro ${styles.BetText}`}>Your bet: {playerData && Number(ethers.utils.formatEther(playerData.bet)).toFixed(3)} ETH</span>

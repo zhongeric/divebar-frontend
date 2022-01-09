@@ -2,6 +2,18 @@
   display: grid;
 }
 
+body {
+    background: #112 url(//images.weserv.nl/?url=i.imgur.com/6QJjYMe.jpg)  center no-repeat;
+    background-size:cover;
+    color: white;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .retro{
     display: inline-block;
     vertical-align: middle;
@@ -16,8 +28,8 @@
     font-family: 'Roboto Mono', sans-serif;
     font-weight: 400;
     text-align: left;
-    border: 3px solid black!important;
+    border: 3px solid #495057!important;
     border-radius: 0;
-    box-shadow: 3px 3px black, 5px 5px white;
+    box-shadow: 3px 3px #495057, 5px 5px white;
     /* padding-right: 5%; */
 }
