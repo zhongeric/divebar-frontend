@@ -43,7 +43,7 @@ export const DiveBar = () => {
     const [currentAccount, setCurrentAccount] = React.useState("");
     const [diveBarContract, setDiveBarContract] = React.useState<ethers.Contract | null>(null);
     const [currentGame, setCurrentGame] = React.useState<GameType | null>(null);
-    const [playerBet, setPlayerBet] = React.useState<string>('0');
+    const [playerBet, setPlayerBet] = React.useState<string>('');
     const [playerHasBet, setPlayerHasBet] = React.useState<boolean>(false);
     const [timeLeft, setTimeLeft] = React.useState<string>("");
     const [playerData, setPlayerData] = React.useState<{bet: BigNumber, timestamp: BigNumber} | null>(null);
@@ -271,10 +271,11 @@ export const DiveBar = () => {
     }
 
     const placeBet = async () => {
-        if(playerBet === '0') {
+        if(Number(playerBet) === 0) {
             alert("Please enter a bet amount!");
             return;
         }
+
         const parsedAmt = ethers.utils.parseEther(playerBet);
 
         if(diveBarContract === null) {
@@ -287,7 +288,7 @@ export const DiveBar = () => {
             return;
         }
 
-        if(parsedAmt < currentGame?.minDeposit) {
+        if(parsedAmt < currentGame.minDeposit) {
             alert("Bet amount must be greater than or equal to the minimum deposit");
             return;
         }
@@ -350,7 +351,7 @@ export const DiveBar = () => {
                 {/* <h1 className={styles.HeadingPrimary}>Divebar</h1> */}
                 <div className={styles.LogoGameBox}>
                     <div className="logo"><b>d<span>i</span>ve<span>b</span>ar</b></div>
-                    <span className={styles.GameNumberText}>Game #48</span>
+                    <span className={styles.GameNumberText}>Game #{currentGame && currentGame.id.toString()}</span>
                 </div>
                 <div className={styles.BalanceBox}>
                     {userBalance && <span style={{
