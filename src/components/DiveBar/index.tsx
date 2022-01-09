@@ -5,7 +5,7 @@ import abi from "../../utils/DiveBar.json";
 
 import styles from './DiveBar.module.css';
 import '../shared/Neon.css';
-import { formatAccountAddress, getFormattedGameTimer } from '../../utils';
+import { formatAccountAddress, formatBN, getFormattedGameTimer } from '../../utils';
 import Countdown from 'react-countdown';
 
 import { 
@@ -197,7 +197,7 @@ export const DiveBar = () => {
                 id: gameInfo['id'],
                 playersSize: gameInfo['playersSize'],
                 pot: gameInfo['pot'],
-                avg: gameInfo['avg'],
+                avg: gameInfo['avg'].value,
                 timeLimit: gameInfo['timeLimit'],
                 minDeposit: gameInfo['minDeposit'],
                 createdAt: gameInfo['createdAt'],
@@ -346,7 +346,7 @@ export const DiveBar = () => {
                     {userBalance && <span style={{
                         color: 'black',
                         fontWeight: 600
-                    }}>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>}
+                    }}>Balance: {formatBN(userBalance)} {getNativeTokenName(currentNetworkChainId)}</span>}
                     <button className={`${styles.ConnectAccountBtn}`} onClick={withdraw}>
                         Withdraw
                     </button>
@@ -368,7 +368,7 @@ export const DiveBar = () => {
                     </div>
                     <div className={styles.MainGame}>
                         <span className={styles.HeadingPrimary}>The bar is currently at</span>
-                        <span className={styles.BarText}>{Number(ethers.utils.formatEther(currentGame.avg)).toFixed(3)} Ξ</span>
+                        <span className={styles.BarText}>{formatBN(currentGame.avg)} Ξ</span>
                     </div>
                     {/* <div>
                         Bets visualization here
@@ -376,7 +376,7 @@ export const DiveBar = () => {
                     <div className={styles.PotDisplay}>
                         <span className={styles.PotText} style={{
                             marginRight: '1rem'
-                        }}>Pot: {Number(ethers.utils.formatEther(currentGame.pot)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>
+                        }}>Pot: {formatBN(currentGame.pot)} {getNativeTokenName(currentNetworkChainId)}</span>
                         <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
                     </div>
                     {playerHasBet === false ? <div className={styles.BetContainer}>
@@ -392,16 +392,16 @@ export const DiveBar = () => {
                         </button>
                     </div> : 
                     <div className={styles.BetContainer}>
-                        <span className={`retro ${styles.BetText}`}>Your bet: {playerData && Number(ethers.utils.formatEther(playerData.bet)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>
+                        <span className={`retro ${styles.BetText}`}>Your bet: {playerData && formatBN(playerData.bet)} {getNativeTokenName(currentNetworkChainId)}</span>
                     </div>}
                 </div>}
                 <div className={styles.RulesContainer}>
                     <span className={styles.HeadingSecondary}>This establishment's rules:</span>
                     <div className={styles.Rules}>
                         <span>You may only bet once per game. You cannot withdraw your bet once it is placed.</span><br />
-                        <span>The minimum bet is {currentGame && ethers.utils.formatEther(currentGame.minDeposit)} {getNativeTokenName(currentNetworkChainId)}.</span><br />
+                        <span>The minimum bet is {currentGame && formatBN(currentGame.minDeposit)} {getNativeTokenName(currentNetworkChainId)}.</span><br />
                         <span>Patrons are rewarded for betting earlier than others. For more details on how this is calculated, see Rewards below.</span><br />
-                        <span>The esteemed Divebar establishment takes 0.01% of all winnings to keep the lights on.</span><br />
+                        <span>The esteemed Divebar establishment takes 1% of all winnings to keep the lights on.</span><br />
                     </div>
                     <span className={styles.HeadingSecondary}>Rewards</span>
                     <div className={styles.Rules}>

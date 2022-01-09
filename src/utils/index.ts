@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 export interface supportedNetworksChainId {
     [key: string]: 'KOVAN' | 'HARMONY_TESTNET'
@@ -10,13 +10,18 @@ export const SUPPORTED_NETWORKS_CHAIN_ID: supportedNetworksChainId = {
 }
 
 export const NETWORK_CONTRACT_ADDRESSES = {
-    KOVAN: "0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8",
-    HARMONY_TESTNET: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
+    KOVAN: "0x5ef6014A0De7b72372eE689889637d1b5b488652",
+    HARMONY_TESTNET: "0xc518433cf505196E6c57687a1cE5b0DfaE1bEe0c"
 }
 
 export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
     KOVAN: "ETH",
     HARMONY_TESTNET: "ONE"
+}
+
+export const formatBN = (bn: BigNumber, _percision = 3) => {
+    const bnAvg = ethers.BigNumber.from(bn);
+    return Number(ethers.utils.formatEther(bnAvg)).toFixed(_percision);
 }
 
 export const formatAccountAddress = (address: string) => {
