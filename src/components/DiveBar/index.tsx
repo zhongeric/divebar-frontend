@@ -5,7 +5,7 @@ import abi from "../../utils/DiveBar.json";
 
 import styles from './DiveBar.module.css';
 import '../shared/Neon.css';
-import { getFormattedGameTimer } from '../../utils';
+import { formatAccountAddress, getFormattedGameTimer } from '../../utils';
 import Countdown from 'react-countdown';
 
 import { 
@@ -185,12 +185,12 @@ export const DiveBar = () => {
     const getGameInfo = async () => {
         try {
           const { ethereum } = window;
+          if(!ethereum) throw Error("No ethereum object");
           if(diveBarContract === null) {
                 console.log("Failed to get diveBarContract");
                 return;
           }
     
-          if (ethereum) {
             let gameInfo = await diveBarContract.getGameInfo();
             console.log("Got gameInfo for game #", gameInfo.id.toString());
             setCurrentGame({
@@ -203,9 +203,6 @@ export const DiveBar = () => {
                 createdAt: gameInfo['createdAt'],
                 endingAt: gameInfo['endingAt'],
             });
-          } else {
-            console.log("Ethereum object doesn't exist!");
-          }
         } catch (error) {
           console.log(error);
         //   throw error;
@@ -215,6 +212,7 @@ export const DiveBar = () => {
     const getPlayerBetInfo = async () => {
         try {
           const { ethereum } = window;
+          if(!ethereum) throw Error("No ethereum object");
           if(diveBarContract === null) {
                 console.log("Failed to get diveBarContract");
                 return;
@@ -224,16 +222,12 @@ export const DiveBar = () => {
                 return;
             }
     
-          if (ethereum) {
             let playerBetInfo = await diveBarContract.getPlayer(currentAccount);
             console.log("Got playerBetInfo: ", playerBetInfo);
             setPlayerData({
                 bet: playerBetInfo['bet'],
                 timestamp: playerBetInfo['timestamp'],
             })
-          } else {
-            console.log("Ethereum object doesn't exist!");
-          }
         } catch (error) {
             console.log("Player is not in the game");
             console.log(error);
@@ -243,6 +237,7 @@ export const DiveBar = () => {
     const getUserBalance = async () => {
         try {
             const { ethereum } = window;
+            if(!ethereum) throw Error("No ethereum object");
             if(diveBarContract === null) {
                 console.log("Failed to get diveBarContract");
                 return;
@@ -252,13 +247,9 @@ export const DiveBar = () => {
                 return;
             }
             
-            if (ethereum) {
-                let userBalance = await diveBarContract.getUserBalance(currentAccount);
-                console.log("Got userBalance: ", userBalance);
-                setUserBalance(userBalance);
-            } else {
-                console.log("Ethereum object doesn't exist!");
-            }
+            let userBalance = await diveBarContract.getUserBalance(currentAccount);
+            console.log("Got userBalance: ", userBalance);
+            setUserBalance(userBalance);
         } catch (error) {
             console.log(error);
         }
@@ -335,21 +326,26 @@ export const DiveBar = () => {
                 )
                     :
                     <div className={styles.WalletConnected}>
-                        <img style={{
-                            maxWidth: '25px',
-                            marginRight: '0.5rem'
-                        }} src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"></img>
-                        <span style={{ color: 'black' }}>Wallet connected</span>
-                    </div>
+                            <img style={{
+                                maxWidth: '25px',
+                                marginRight: '0.5rem'
+                            }} src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"></img>
+                            <div className={styles.WalletConnectedTextBox}>
+                                <span style={{ color: 'black', marginBottom: '0.5rem' }}>{formatAccountAddress(currentAccount)}</span>
+                                <span style={{ color: 'black' }}>{SUPPORTED_NETWORKS_CHAIN_ID[currentNetworkChainId]}</span>
+                            </div>
+                     </div>
                 }
                 {/* <h1 className={styles.HeadingPrimary}>Divebar</h1> */}
                 <div className={styles.LogoGameBox}>
                     <div className="logo"><b>d<span>i</span>ve<span>b</span>ar</b></div>
                     <span className={styles.GameNumberText}>Game #{currentGame && currentGame.id.toString()}</span>
+                    {/* <span className={styles.GameNumberText}>Started at {currentGame && new Date(currentGame.createdAt.toNumber()).toLocaleTimeString()}</span> */}
                 </div>
                 <div className={styles.BalanceBox}>
                     {userBalance && <span style={{
-                        color: 'black'
+                        color: 'black',
+                        fontWeight: 600
                     }}>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>}
                     <button className={`${styles.ConnectAccountBtn}`} onClick={withdraw}>
                         Withdraw
@@ -390,7 +386,7 @@ export const DiveBar = () => {
                             lineHeight: '2',
                             marginLeft: '0.5rem',
                             alignSelf: 'end'
-                        }}>ETH</span>
+                        }}>{getNativeTokenName(currentNetworkChainId)}</span>
                         <button className={`${styles.BetBtn}`} onClick={placeBet}>
                             <div className="logoRegFont"><b>E<span>nt</span>er</b></div>
                         </button>

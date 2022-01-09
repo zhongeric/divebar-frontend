@@ -19,6 +19,10 @@ export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
     HARMONY_TESTNET: "ONE"
 }
 
+export const formatAccountAddress = (address: string) => {
+    return address.slice(0, 6) + "..." + address.slice(-4);
+}
+
 export const getTimeUntil = (end: BigNumber) => {
     const now = new Date().getTime();
     const diff = end.toNumber() - now;
