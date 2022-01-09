@@ -42,7 +42,6 @@ export const DiveBar = () => {
     const [timeLeft, setTimeLeft] = React.useState<string>("");
     const [playerData, setPlayerData] = React.useState<{bet: BigNumber, timestamp: BigNumber} | null>(null);
     const [userBalance, setUserBalance] = React.useState<BigNumber | null>(null);
-    // const contractAddress = '0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8';
     const contractABI = abi.abi;
 
     const isNetworkSupported = () => {
@@ -99,8 +98,8 @@ export const DiveBar = () => {
                 // event with a null oldNetwork along with the newNetwork. So, if the
                 // oldNetwork exists, it represents a changing network
                 setCurrentNetworkChainId(newNetwork.chainId);
+                // reset contract
                 if(!(newNetwork.chainId in SUPPORTED_NETWORKS_CHAIN_ID)) {
-                    console.log("Network not supported: " + newNetwork.chainId);
                     return;
                 }
                 if (oldNetwork) {
@@ -121,6 +120,10 @@ export const DiveBar = () => {
             console.log("Failed to get provider")
             return;
         }
+        if(!contractAddress) {
+            console.log("Contract address not set")
+            return;
+        }
         const contract = new ethers.Contract(contractAddress, contractABI, provider.getSigner());
         setDiveBarContract(contract);
         console.log("Got contract")
@@ -134,6 +137,9 @@ export const DiveBar = () => {
           if(currentNetworkChainId in SUPPORTED_NETWORKS_CHAIN_ID) {
             setContractAddress(NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[currentNetworkChainId]]);
           }
+          else {
+            console.log("Network not supported: " + currentNetworkChainId);
+          }
       }, [currentNetworkChainId])
 
       React.useEffect(() => {
@@ -142,7 +148,6 @@ export const DiveBar = () => {
 
       React.useEffect(() => {
         if(!isNetworkSupported() || !diveBarContract) {
-            console.log("Network not supported or contract not found")
             return;
         }
         getGameInfo();
@@ -261,7 +266,6 @@ export const DiveBar = () => {
             return;
         }
 
-        const parsedAmt = ethers.utils.parseEther(playerBet);
 
         if(diveBarContract === null) {
             console.log("Failed to get diveBarContract");
@@ -272,11 +276,16 @@ export const DiveBar = () => {
             console.log("Failed to get currentGame");
             return;
         }
-
+        const parsedAmt = ethers.utils.parseEther(playerBet);
         if(parsedAmt < currentGame.minDeposit) {
             alert("Bet amount must be greater than or equal to the minimum deposit");
             return;
         }
+        if(Date.now() / 1000 > ethers.BigNumber.from(currentGame.endingAt).toNumber()) {
+            alert("Bet cannot be placed after the game has ended");
+            return;
+        }
+
         // txn will be reverted if game is over
 
         try {
@@ -332,7 +341,7 @@ export const DiveBar = () => {
                             }} src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"></img>
                             <div className={styles.WalletConnectedTextBox}>
                                 <span style={{ color: 'black', marginBottom: '0.5rem' }}>{formatAccountAddress(currentAccount)}</span>
-                                <span style={{ color: 'black' }}>{SUPPORTED_NETWORKS_CHAIN_ID[currentNetworkChainId]}</span>
+                                <span style={{ color: 'black' }}>{SUPPORTED_NETWORKS_CHAIN_ID[currentNetworkChainId] ? SUPPORTED_NETWORKS_CHAIN_ID[currentNetworkChainId] : <span style={{color: 'red'}}>Wrong network</span>}</span>
                             </div>
                      </div>
                 }
