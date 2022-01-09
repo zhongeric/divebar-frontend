@@ -8,6 +8,14 @@ import '../shared/Neon.css';
 import { getFormattedGameTimer } from '../../utils';
 import Countdown from 'react-countdown';
 
+import { 
+    supportedNetworksChainId, 
+    SUPPORTED_NETWORKS_CHAIN_ID, 
+    NETWORK_CONTRACT_ADDRESSES, 
+    NETWORK_NATIVE_TOKEN_SYMBOLS,
+    getNativeTokenName
+} from '../../utils';
+
 declare let window: any;
 
 type GameType = {
@@ -19,20 +27,6 @@ type GameType = {
     minDeposit: BigNumber,
     createdAt: BigNumber,
     endingAt: BigNumber,
-}
-
-interface supportedNetworksChainId {
-    [key: string]: 'KOVAN' | 'HARMONY_TESTNET'
-}
-
-const SUPPORTED_NETWORKS_CHAIN_ID: supportedNetworksChainId = {
-    "42": 'KOVAN',
-    "1666700000": 'HARMONY_TESTNET'
-}
-
-const NETWORK_CONTRACT_ADDRESSES = {
-    KOVAN: "0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8",
-    HARMONY_TESTNET: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
 }
 
 export const DiveBar = () => {
@@ -356,7 +350,7 @@ export const DiveBar = () => {
                 <div className={styles.BalanceBox}>
                     {userBalance && <span style={{
                         color: 'black'
-                    }}>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} ETH</span>}
+                    }}>Balance: {Number(ethers.utils.formatEther(userBalance)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>}
                     <button className={`${styles.ConnectAccountBtn}`} onClick={withdraw}>
                         Withdraw
                     </button>
@@ -386,7 +380,7 @@ export const DiveBar = () => {
                     <div className={styles.PotDisplay}>
                         <span className={styles.PotText} style={{
                             marginRight: '1rem'
-                        }}>Pot: {Number(ethers.utils.formatEther(currentGame.pot)).toFixed(3)} ETH</span>
+                        }}>Pot: {Number(ethers.utils.formatEther(currentGame.pot)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>
                         <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
                     </div>
                     {playerHasBet === false ? <div className={styles.BetContainer}>
@@ -402,14 +396,14 @@ export const DiveBar = () => {
                         </button>
                     </div> : 
                     <div className={styles.BetContainer}>
-                        <span className={`retro ${styles.BetText}`}>Your bet: {playerData && Number(ethers.utils.formatEther(playerData.bet)).toFixed(3)} ETH</span>
+                        <span className={`retro ${styles.BetText}`}>Your bet: {playerData && Number(ethers.utils.formatEther(playerData.bet)).toFixed(3)} {getNativeTokenName(currentNetworkChainId)}</span>
                     </div>}
                 </div>}
                 <div className={styles.RulesContainer}>
-                    <span className={styles.HeadingSecondary}>The establishment's rules:</span>
+                    <span className={styles.HeadingSecondary}>This establishment's rules:</span>
                     <div className={styles.Rules}>
                         <span>You may only bet once per game. You cannot withdraw your bet once it is placed.</span><br />
-                        <span>The minimum bet is {currentGame && ethers.utils.formatEther(currentGame.minDeposit)} ETH.</span><br />
+                        <span>The minimum bet is {currentGame && ethers.utils.formatEther(currentGame.minDeposit)} {getNativeTokenName(currentNetworkChainId)}.</span><br />
                         <span>Patrons are rewarded for betting earlier than others. For more details on how this is calculated, see Rewards below.</span><br />
                         <span>The esteemed Divebar establishment takes 0.01% of all winnings to keep the lights on.</span><br />
                     </div>
@@ -425,7 +419,7 @@ export const DiveBar = () => {
                         <br />
                         <span>This strategy is employed to combat the edge that players who enter later have, since they can view the bets of everyone before them.</span>
                         <br />
-                        <span>Your winnings in ETH will be displayed at the top of the page, and you can withdraw them via the Withdraw button at anytime.</span>
+                        <span>Your winnings in {getNativeTokenName(currentNetworkChainId)} will be displayed at the top of the page, and you can withdraw them via the Withdraw button at anytime.</span>
                     </div>
                 </div>
             </div>

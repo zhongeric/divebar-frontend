@@ -1,5 +1,24 @@
 import { BigNumber } from "ethers";
 
+export interface supportedNetworksChainId {
+    [key: string]: 'KOVAN' | 'HARMONY_TESTNET'
+}
+
+export const SUPPORTED_NETWORKS_CHAIN_ID: supportedNetworksChainId = {
+    "42": 'KOVAN',
+    "1666700000": 'HARMONY_TESTNET'
+}
+
+export const NETWORK_CONTRACT_ADDRESSES = {
+    KOVAN: "0xa832A99A39CF03454044aC2b2Ce4ACd4dFBECEE8",
+    HARMONY_TESTNET: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
+}
+
+export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
+    KOVAN: "ETH",
+    HARMONY_TESTNET: "ONE"
+}
+
 export const getTimeUntil = (end: BigNumber) => {
     const now = new Date().getTime();
     const diff = end.toNumber() - now;
@@ -22,4 +41,8 @@ export const getFormattedGameTimer = ({ days, hours, minutes, seconds }: {days: 
     const minutesString = Number(minutes) > 0 ? `${Number(minutes)} minutes ` : "";
     const secondsString = Number(seconds) > 0 ? `${Number(seconds)}.${milliseconds} seconds ` : "";
     return `${daysString}${hoursString}${minutesString}${secondsString}` ? `${daysString}${hoursString}${minutesString}${secondsString}` : "The game has ended.";
+}
+
+export const getNativeTokenName = (chainId: string) => {
+    return NETWORK_NATIVE_TOKEN_SYMBOLS[SUPPORTED_NETWORKS_CHAIN_ID[chainId]];
 }
