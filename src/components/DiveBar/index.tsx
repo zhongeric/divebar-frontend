@@ -323,8 +323,12 @@ export const DiveBar = () => {
                 {/* <h1 className={styles.HeadingPrimary}>Divebar</h1> */}
                 <div className={styles.LogoGameBox}>
                     <div className="logo"><b>d<span>i</span>ve<span>b</span>ar</b></div>
-                    <span className={styles.GameNumberText}>Game #{currentGame && currentGame.id.toString()}</span>
-                    {/* <span className={styles.GameNumberText}>Started at {currentGame && new Date(currentGame.createdAt.toNumber()).toLocaleTimeString()}</span> */}
+                    <span className={styles.GameNumberText}>
+                        Game #{currentGame && currentGame.id.toString()}
+                    </span>
+                    <span style={{
+                        marginTop: '0.5rem'
+                    }}>Started at {currentGame && new Date(ethers.BigNumber.from(currentGame.createdAt).toNumber() * 1000).toLocaleTimeString()}</span>
                 </div>
                 <div className={styles.BalanceBox}>
                     {userBalance && <span style={{
