@@ -129,8 +129,12 @@ export const DiveBar = () => {
         console.log("Got contract")
       }
 
+      // state management
+
       React.useEffect(() => {
         checkIfWalletIsConnected();
+        getPlayerBetInfo();
+        getUserBalance();
       }, [])
 
       React.useEffect(() => {
@@ -151,7 +155,6 @@ export const DiveBar = () => {
             return;
         }
         getGameInfo();
-        getUserBalance();
       }, [diveBarContract, currentNetworkChainId])
 
       // call getGameInfo every second
@@ -166,9 +169,7 @@ export const DiveBar = () => {
             return () => clearInterval(interval);
         }, [diveBarContract, currentNetworkChainId])
     
-      /**
-      * Implement your connectWallet method here
-      */
+
       const connectWallet = async () => {
         try {
             const { ethereum } = window;
@@ -189,15 +190,12 @@ export const DiveBar = () => {
 
     const getGameInfo = async () => {
         try {
-          const { ethereum } = window;
-          if(!ethereum) throw Error("No ethereum object");
-          if(diveBarContract === null) {
-                console.log("Failed to get diveBarContract");
-                return;
-          }
+            const { ethereum } = window;
+            if(!ethereum) throw Error("No ethereum object");
+            if(diveBarContract === null) return;
     
             let gameInfo = await diveBarContract.getGameInfo();
-            console.log("Got gameInfo for game #", gameInfo.id.toString());
+            // console.log("Got gameInfo for game #", gameInfo.id.toString());
             setCurrentGame({
                 id: gameInfo['id'],
                 playersSize: gameInfo['playersSize'],
@@ -210,32 +208,23 @@ export const DiveBar = () => {
             });
         } catch (error) {
           console.log(error);
-        //   throw error;
         }
     }
 
     const getPlayerBetInfo = async () => {
         try {
-          const { ethereum } = window;
-          if(!ethereum) throw Error("No ethereum object");
-          if(diveBarContract === null) {
-                console.log("Failed to get diveBarContract");
-                return;
-          }
-          if(!currentAccount) {
-                console.log("currentAccount is null");
-                return;
-            }
-    
+            const { ethereum } = window;
+            if(!ethereum) throw Error("No ethereum object");
+            if(diveBarContract === null) return;
+            if(!currentAccount) return;
             let playerBetInfo = await diveBarContract.getPlayer(currentAccount);
-            console.log("Got playerBetInfo: ", playerBetInfo);
             setPlayerData({
                 bet: playerBetInfo['bet'],
                 timestamp: playerBetInfo['timestamp'],
             })
+            setPlayerHasBet(playerBetInfo['bet'] > 0);
         } catch (error) {
             console.log("Player is not in the game");
-            console.log(error);
         }
     }
 
@@ -244,16 +233,13 @@ export const DiveBar = () => {
             const { ethereum } = window;
             if(!ethereum) throw Error("No ethereum object");
             if(diveBarContract === null) {
-                console.log("Failed to get diveBarContract");
                 return;
             }
             if(!currentAccount) {
-                console.log("currentAccount is null");
                 return;
             }
             
             let userBalance = await diveBarContract.getUserBalance(currentAccount);
-            console.log("Got userBalance: ", userBalance);
             setUserBalance(userBalance);
         } catch (error) {
             console.log(error);
@@ -266,16 +252,9 @@ export const DiveBar = () => {
             return;
         }
 
+        if(diveBarContract === null) return;
+        if(!currentGame) return;
 
-        if(diveBarContract === null) {
-            console.log("Failed to get diveBarContract");
-            return;
-        }
-
-        if(!currentGame) {
-            console.log("Failed to get currentGame");
-            return;
-        }
         const parsedAmt = ethers.utils.parseEther(playerBet);
         if(parsedAmt < currentGame.minDeposit) {
             alert("Bet amount must be greater than or equal to the minimum deposit");
@@ -287,7 +266,6 @@ export const DiveBar = () => {
         }
 
         // txn will be reverted if game is over
-
         try {
             const provider = getProvider();
             if(!provider) {
@@ -309,18 +287,14 @@ export const DiveBar = () => {
         }
         catch(err){
             console.log(err);
-            throw err;
+            alert("There was an error placing your bet. Please try again later.");
         }
     }
 
     const withdraw = async () => {
-        if(diveBarContract === null) {
-            console.log("Failed to get diveBarContract");
-            return;
-        }
+        if(diveBarContract === null) return;
         // txn will be reverted if nothing to withdraw
         const txn = await diveBarContract.getPayout();
-        console.log("Withdraw txn: ", txn);
         // call getUserBalance() to update userBalance
         await getUserBalance();
     }
@@ -355,7 +329,7 @@ export const DiveBar = () => {
                     {userBalance && <span style={{
                         color: 'black',
                         fontWeight: 600
-                    }}>Balance: {formatBN(userBalance)} {getNativeTokenName(currentNetworkChainId)}</span>}
+                    }}>Winnings: {formatBN(userBalance)} {getNativeTokenName(currentNetworkChainId)}</span>}
                     <button className={`${styles.ConnectAccountBtn}`} onClick={withdraw}>
                         Withdraw
                     </button>
