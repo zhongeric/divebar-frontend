@@ -133,8 +133,6 @@ export const DiveBar = () => {
 
       React.useEffect(() => {
         checkIfWalletIsConnected();
-        getPlayerBetInfo();
-        getUserBalance();
       }, [])
 
       React.useEffect(() => {
@@ -151,11 +149,15 @@ export const DiveBar = () => {
       }, [contractAddress])
 
       React.useEffect(() => {
+        getPlayerBetInfo();
+        getUserBalance();
+      }, [diveBarContract, currentAccount]);
+
+      React.useEffect(() => {
         if(!isNetworkSupported() || !diveBarContract) {
             return;
         }
         getGameInfo();
-        getUserBalance();
       }, [diveBarContract, currentNetworkChainId])
 
       // call getGameInfo every second
@@ -380,7 +382,8 @@ export const DiveBar = () => {
                         </button>
                     </div> : 
                     <div className={styles.BetContainer}>
-                        <span className={`retro ${styles.BetText}`}>Your bet: {playerData && formatBN(playerData.bet)} {getNativeTokenName(currentNetworkChainId)}</span>
+                        <div className="logoRegFont"><b>Your<span> bet: </span>{playerData && formatBN(playerData.bet)} {getNativeTokenName(currentNetworkChainId)}</b></div>
+                        {/* <span className={`${styles.BetText}`}>Your bet: {playerData && formatBN(playerData.bet)} {getNativeTokenName(currentNetworkChainId)}</span> */}
                     </div>}
                 </div>}
                 <div className={styles.RulesContainer}>
