@@ -5,7 +5,7 @@ import abi from "../../utils/DiveBar.json";
 
 import styles from './DiveBar.module.css';
 import '../shared/Neon.css';
-import { formatAccountAddress, formatBN, getFormattedGameTimer } from '../../utils';
+import { formatAccountAddress, formatBN, getExplorerUrl, getFormattedGameTimer } from '../../utils';
 import Countdown from 'react-countdown';
 
 import { 
@@ -392,11 +392,11 @@ export const DiveBar = () => {
                         <span>You may only bet once per game. You cannot withdraw your bet once it is placed.</span><br />
                         <span>The minimum bet is {currentGame && formatBN(currentGame.minDeposit)} {getNativeTokenName(currentNetworkChainId)}.</span><br />
                         <span>Patrons are rewarded for betting earlier than others. For more details on how this is calculated, see Rewards below.</span><br />
-                        <span>The esteemed Divebar establishment takes 1% of all winnings to keep the lights on.</span><br />
+                        <span>Divebar takes 1% of all winnings to keep the lights on.</span><br />
                     </div>
                     <span className={styles.HeadingSecondary}>Rewards</span>
                     <div className={styles.Rules}>
-                        <span>You are a winner of the game if your bet is above the simple average of all other bets when the game ends.</span>
+                        <span>You are a winner of the game if your bet is above the average of all other bets when the game ends.</span>
                         <br />
                         <span>Winners receive a payout structured as follows:</span>   
                         <br />
@@ -404,9 +404,16 @@ export const DiveBar = () => {
                         <br />
                         <span>The weighted portion decreases polynomially as the game timer winds down. Thus, the last player to enter will receive only their original bet back if they win. The entire pot is returned to the winners of each game.</span>
                         <br />
-                        <span>This strategy is employed to combat the edge that players who enter later have, since they can view the bets of everyone before them.</span>
+                        <span>This strategy is used to counteract the edge that players who enter later have, since the average is less likely to change drastically towards the end of the game.</span>
                         <br />
                         <span>Your winnings in {getNativeTokenName(currentNetworkChainId)} will be displayed at the top of the page, and you can withdraw them via the Withdraw button at anytime.</span>
+                        <br />
+                    </div>
+                    <span className={styles.HeadingSecondary}>Resources</span>
+                    <div className={styles.Rules}>
+                        <span>DM us on <a className={styles.Link} href="https://twitter.com/thedivebar_xyz" target="_blank">Twitter</a> for technical issues</span>
+                        <br />
+                        <span>Contract address: <a className={styles.Link} href={getExplorerUrl(currentNetworkChainId)}>explorer link</a></span>
                     </div>
                 </div>
             </div>

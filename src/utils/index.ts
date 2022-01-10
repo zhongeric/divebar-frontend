@@ -19,6 +19,17 @@ export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
     HARMONY_TESTNET: "ONE"
 }
 
+export const getExplorerUrl = (chainId: string) => {
+    switch (SUPPORTED_NETWORKS_CHAIN_ID[chainId]) {
+        case 'KOVAN':
+            return `https://kovan.etherscan.io/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
+        case 'HARMONY_TESTNET':
+            return `https://explorer.pops.one/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
+        default:
+            return "";
+    }
+}
+
 export const formatBN = (bn: BigNumber, _percision = 3) => {
     const bnAvg = ethers.BigNumber.from(bn);
     return Number(ethers.utils.formatEther(bnAvg)).toFixed(_percision);
