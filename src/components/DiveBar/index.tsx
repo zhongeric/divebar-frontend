@@ -155,6 +155,7 @@ export const DiveBar = () => {
             return;
         }
         getGameInfo();
+        getUserBalance();
       }, [diveBarContract, currentNetworkChainId])
 
       // call getGameInfo every second
