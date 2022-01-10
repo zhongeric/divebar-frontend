@@ -1,22 +1,25 @@
 import { BigNumber, ethers } from "ethers";
 
 export interface supportedNetworksChainId {
-    [key: string]: 'KOVAN' | 'HARMONY_TESTNET'
+    [key: string]: 'KOVAN' | 'HARMONY_TESTNET' | 'FANTOM_TESTNET'
 }
 
 export const SUPPORTED_NETWORKS_CHAIN_ID: supportedNetworksChainId = {
     "42": 'KOVAN',
-    "1666700000": 'HARMONY_TESTNET'
+    "1666700000": 'HARMONY_TESTNET',
+    "4002": 'FANTOM_TESTNET'
 }
 
 export const NETWORK_CONTRACT_ADDRESSES = {
     KOVAN: "0xD8Cffd2eF7fA46f8b24f93E123dF6c430E2Ead59",
-    HARMONY_TESTNET: "0xD618724A779efF8e173a8500Ff796B37c33C7433"
+    HARMONY_TESTNET: "0xD618724A779efF8e173a8500Ff796B37c33C7433",
+    FANTOM_TESTNET: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
 }
 
 export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
     KOVAN: "ETH",
-    HARMONY_TESTNET: "ONE"
+    HARMONY_TESTNET: "ONE",
+    FANTOM_TESTNET: "FTM"
 }
 
 export const getExplorerUrl = (chainId: string) => {
@@ -25,6 +28,8 @@ export const getExplorerUrl = (chainId: string) => {
             return `https://kovan.etherscan.io/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
         case 'HARMONY_TESTNET':
             return `https://explorer.pops.one/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
+        case 'FANTOM_TESTNET':
+            return `https://testnet.ftmscan.com/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
         default:
             return "";
     }
