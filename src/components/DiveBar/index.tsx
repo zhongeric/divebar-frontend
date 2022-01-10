@@ -358,7 +358,7 @@ export const DiveBar = () => {
                     </div>
                     <div className={styles.MainGame}>
                         <span className={styles.HeadingPrimary}>The bar is currently at</span>
-                        <span className={styles.BarText}>{formatBN(currentGame.avg)} Ξ</span>
+                        <span className={styles.BarText}>{formatBN(currentGame.avg)} {getNativeTokenName(currentNetworkChainId)}</span>
                     </div>
                     {/* <div>
                         Bets visualization here
