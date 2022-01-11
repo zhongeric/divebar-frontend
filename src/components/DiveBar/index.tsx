@@ -413,7 +413,7 @@ export const DiveBar = () => {
                     <div className={styles.Rules}>
                         <span>DM us on <a className={styles.Link} href="https://twitter.com/thedivebar_xyz" target="_blank">Twitter</a> for technical issues</span>
                         <br />
-                        <span>Contract address: <a className={styles.Link} href={getExplorerUrl(currentNetworkChainId)}>explorer link</a></span>
+                        <span>Contract address: <a className={styles.Link} href={getExplorerUrl(currentNetworkChainId)} target="_blank">explorer link</a></span>
                     </div>
                 </div>
             </div>
