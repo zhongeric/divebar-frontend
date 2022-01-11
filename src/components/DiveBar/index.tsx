@@ -120,11 +120,11 @@ export const DiveBar = () => {
             });
             provider.on(getEventFilter('Payout(address,uint256)'), (log, event) => {
                 // Emitted whenever a payout is made
-                console.log("Payout event: ", log, event);
+                // console.log("Payout event: ", log, event);
             })
             provider.on(getEventFilter('Deposit(address,uint256)'), (log, event) => {
                 // Emitted whenever a payout is made
-                console.log("Deposit event: ", log, event);
+                // console.log("Deposit event: ", log, event);
             })
             return provider;
       }
