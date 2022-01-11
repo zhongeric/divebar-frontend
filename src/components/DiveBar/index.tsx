@@ -1,5 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap_white.css';
 import { BigNumber, ethers } from "ethers";
 import abi from "../../utils/DiveBar.json";
 
@@ -43,6 +45,16 @@ export const DiveBar = () => {
     const [playerData, setPlayerData] = React.useState<{bet: BigNumber, timestamp: BigNumber} | null>(null);
     const [userBalance, setUserBalance] = React.useState<BigNumber | null>(null);
     const contractABI = abi.abi;
+
+    const getEventFilter = (eventString: string) => {
+        return {
+            address: contractAddress,
+            topics: [
+                ethers.utils.id(eventString)
+                // "Payout(address,uint256)"
+            ]
+        }
+    }
 
     const isNetworkSupported = () => {
         return currentNetworkChainId in SUPPORTED_NETWORKS_CHAIN_ID;
@@ -106,6 +118,14 @@ export const DiveBar = () => {
                     window.location.reload();
                 }
             });
+            provider.on(getEventFilter('Payout(address,uint256)'), (log, event) => {
+                // Emitted whenever a payout is made
+                // console.log("Payout event: ", log, event);
+            })
+            provider.on(getEventFilter('Deposit(address,uint256)'), (log, event) => {
+                // Emitted whenever a payout is made
+                // console.log("Deposit event: ", log, event);
+            })
             return provider;
       }
 
@@ -280,7 +300,7 @@ export const DiveBar = () => {
             const tx = await signer.sendTransaction({
                 // from: currentAccount,
                 to: contractAddress,
-                value: parsedAmt.add(gasPrice)
+                value: parsedAmt.add(gasPrice),
             });
             await tx.wait();
             console.log("Transaction complete!");
@@ -365,9 +385,26 @@ export const DiveBar = () => {
                     </div> */}
                     <div className={styles.PotDisplay}>
                         <span className={styles.PotText} style={{
-                            marginRight: '1rem'
-                        }}>Pot: {formatBN(currentGame.pot)} {getNativeTokenName(currentNetworkChainId)}</span>
-                        <span className={styles.PotText}>Current players: {currentGame.playersSize.toString()}</span>
+                            marginLeft: '0'
+                        }}>
+                            <b>Pot: </b> 
+                            {formatBN(currentGame.pot)} {getNativeTokenName(currentNetworkChainId)}
+                        </span>
+                        <span className={styles.PotText}>
+                            <b>Current players: </b> 
+                            {currentGame.playersSize.toString()}
+                        </span>
+                        {
+                            // TODO: requires contract redeployment
+                            /* <span className={styles.PotText}>
+                                <b>You are player #</b> 
+                                {playerData.idx.toString()}
+                            </span> */
+                        }
+                        <span className={styles.PotText}>
+                            <b>Current status: </b>
+                            {playerData ? playerData.bet >= currentGame.avg ? "Winner" : "Loser" : "No bet placed"}
+                        </span>
                     </div>
                     {playerHasBet === false ? <div className={styles.BetContainer}>
                         <input type="number" placeholder='0.001' className={styles.BetInput} value={playerBet} onChange={(e) => setPlayerBet(e.currentTarget.value)} />
@@ -385,6 +422,9 @@ export const DiveBar = () => {
                         <div className="logoRegFont"><b>Your<span> bet: </span>{playerData && formatBN(playerData.bet)} {getNativeTokenName(currentNetworkChainId)}</b></div>
                         {/* <span className={`${styles.BetText}`}>Your bet: {playerData && formatBN(playerData.bet)} {getNativeTokenName(currentNetworkChainId)}</span> */}
                     </div>}
+                    {/* <div className={styles.CalculatorContainer}>
+                            
+                    </div> */}
                 </div>}
                 <div className={styles.RulesContainer}>
                     <span className={styles.HeadingSecondary}>This establishment's rules:</span>
