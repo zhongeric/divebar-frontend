@@ -451,6 +451,8 @@ export const DiveBar = () => {
                     </div>
                     <span className={styles.HeadingSecondary}>Resources</span>
                     <div className={styles.Rules}>
+                        <span>Check out the <a className={styles.Link} href="https://docs.thedivebar.xyz/" target="_blank">documentation</a></span>
+                        <br />
                         <span>DM us on <a className={styles.Link} href="https://twitter.com/thedivebar_xyz" target="_blank">Twitter</a> for technical issues</span>
                         <br />
                         <span>Contract address: <a className={styles.Link} href={getExplorerUrl(currentNetworkChainId)} target="_blank">explorer link</a></span>
