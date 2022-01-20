@@ -1,28 +1,31 @@
 import { BigNumber, ethers } from "ethers";
 
 export interface supportedNetworksChainId {
-    [key: string]: 'KOVAN' | 'HARMONY_TESTNET' | 'FANTOM_TESTNET' | 'FANTOM'
+    [key: string]: 'KOVAN' | 'HARMONY_TESTNET' | 'FANTOM_TESTNET' | 'FANTOM' | 'HARMONY'
 }
 
 export const SUPPORTED_NETWORKS_CHAIN_ID: supportedNetworksChainId = {
     "42": 'KOVAN',
     "1666700000": 'HARMONY_TESTNET',
     "4002": 'FANTOM_TESTNET',
-    "250": 'FANTOM'
+    "250": 'FANTOM',
+    "1666600000": 'HARMONY'
 }
 
 export const NETWORK_CONTRACT_ADDRESSES = {
     KOVAN: "0xD8Cffd2eF7fA46f8b24f93E123dF6c430E2Ead59",
     HARMONY_TESTNET: "0xD618724A779efF8e173a8500Ff796B37c33C7433",
     FANTOM_TESTNET: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b",
-    FANTOM: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
+    FANTOM: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b",
+    HARMONY: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b"
 }
 
 export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
     KOVAN: "ETH",
     HARMONY_TESTNET: "ONE",
     FANTOM_TESTNET: "FTM",
-    FANTOM: "FTM"
+    FANTOM: "FTM",
+    HARMONY: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b",
 }
 
 export const getExplorerUrl = (chainId: string) => {
@@ -35,6 +38,8 @@ export const getExplorerUrl = (chainId: string) => {
             return `https://testnet.ftmscan.com/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
         case 'FANTOM':
             return `https://ftmscan.com/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
+        case 'HARMONY':
+            return `https://explorer.harmony.one/address/${NETWORK_CONTRACT_ADDRESSES[SUPPORTED_NETWORKS_CHAIN_ID[chainId]]}`;
         default:
             return "";
     }
