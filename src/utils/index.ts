@@ -25,7 +25,7 @@ export const NETWORK_NATIVE_TOKEN_SYMBOLS = {
     HARMONY_TESTNET: "ONE",
     FANTOM_TESTNET: "FTM",
     FANTOM: "FTM",
-    HARMONY: "0x5CD7F0a504047859e15d4fb97F8086B5A634984b",
+    HARMONY: "ONE",
 }
 
 export const getExplorerUrl = (chainId: string) => {
